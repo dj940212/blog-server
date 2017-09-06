@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "dev": "supervisor ./config/index.js",
+    "dev": "nodemon ./config/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,7 +25,12 @@
     "babel-preset-stage-3": "^6.22.0",
     "babel-register": "^6.24.0",
     "koa": "^2.3.0",
-    "koa-router": "^7.2.1"
+    "koa-bodyparser": "^4.2.0",
+    "koa-logger": "^3.0.1",
+    "koa-router": "^7.2.1",
+    "koa-session": "^5.5.0",
+    "mongoose": "^4.11.10",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "babel-plugin-transform-async-to-generator": "^6.24.1",

@@ -1,15 +1,14 @@
 import Router from 'koa-router'
+import Article from '../app/controllers/article.js'
 
-export default function() {
+export default () => {
 	const router = new Router({ prefix: '/api' })
 
-	router.get('/hello', async ( ctx ) => {
-		ctx.body = 'hello koa!'
-	})
-
-	router.get('/404', async ( ctx ) => {
-		ctx.body = '404 page'
-	})
+    // article
+	router.post('/article/save', Article.save)
+    router.get('/article/list', Article.list)
+    router.post('/article/update', Article.update)
+    router.post('/article/delete', Article.delete)
 
 	return router
 }
