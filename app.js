@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import logger from 'koa-logger'
 import session from 'koa-session'
 import bodyParser from 'koa-bodyparser'
+import cors from 'koa-cors'
 const db = 'mongodb://blog_runner:dj15155620677@59.110.164.55:27017/blog'
 
 mongoose.connect(db)
@@ -14,6 +15,7 @@ mongoose.connection.on("connected",() => {
 const app = new Koa()
 const router = Router()
 
+app.use(cors())
 app.use(logger())
 app.use(session(app))
 app.use(bodyParser())
