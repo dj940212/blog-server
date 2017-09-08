@@ -7,15 +7,16 @@ class Article {
 
     async save(ctx) {
         const key = uuid.v4()
-        console.log(ctx.request)
-        const title = ctx.request.body.title
+        const title = ctx.request.body.title 
         const content = ctx.request.body.content
+        const description = ctx.request.body.description
         const babel  = ctx.request.body.babel.split(',')
 
         const article = new ArticleMod({
             title: title,
             content: content,
-            babel: babel
+            babel: babel,
+            description: description
         })
 
         try {
@@ -49,11 +50,13 @@ class Article {
     async update(ctx) {
         const body = ctx.request.body
         const content = body.content
+        const description = body.description
         const title = body.title
         const _id  = body._id
 
         title && await ArticleMod.update({_id: _id},{$set: {title: title}})
         content && await ArticleMod.update({_id: _id},{$set: {content: content}})
+        description && await ArticleMod.update({_id: _id},{$set: {description: description}})
 
         ctx.body = {
             message: 'success'
@@ -62,7 +65,13 @@ class Article {
 
     async delete(ctx) {
         const _id = ctx.request.body._id
-        ArticleMod.remove({_id: _id})
+        try {
+            await ArticleMod.remove({_id: _id})
+        }catch(e) {
+            ctx.body = {
+                message: 'failed'
+            }
+        }
 
         ctx.body = {
             message: 'success'

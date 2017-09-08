@@ -8,7 +8,7 @@ const ArticleSchema = new Schema({
     babel: [String],
     content: String,
     comment: String,
-    // id: String,
+    description: String,
     meta: {
         createAt: {
             type: Date, 
