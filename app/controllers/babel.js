@@ -3,19 +3,34 @@ import mongoose from 'mongoose'
 import BabelMod from '../models/babel'
 
 class Babel {
-    constructor() {}
+    constructor() {
+
+    }
+
+    async save() {
+        new BabelMod().save({id:'222333'})
+    }
 
     async add( ctx ) {
         const newBabel = ctx.request.body.babel
-        let babel = await BabelMod.find({})
-        if (newBabel) {
-            babel = babel.push(newBabel)
-        }
-        const endBabel = await BabelMod.update({},{$set:{babel: babel}})
+        new BabelMod().save({id:'222333'})
+        let babel = await BabelMod.find({id:'222333'})
+        console.log(babel)
+        // let endBabel
+        // if (babel.length) {
+        //     newBabel && babel.push(newBabel)
+        //     endBabel = await BabelMod.update({id:'222333'},{$set:{babel: babel}})
+        // }else {
+        //     new BabelMod().save({id:'222333'})
+        //     newBabel && babel.push(newBabel)
+        //     console.log(babel)
+        //     endBabel = await BabelMod.update({id:'222333'},{$set:{babel: babel}})
+        // }
+        
 
         ctx.body = {
             message: 'success',
-            babel: endBabel
+            data: babel
         }
     }
 
@@ -27,7 +42,16 @@ class Babel {
 
         ctx.body = {
             message: 'success',
-            babel: endBabel
+            data: endBabel
+        }
+    }
+
+    async list(ctx) {
+        const babel = await BabelMod.find({})
+
+        ctx.body = {
+            message: 'success',
+            data: babel
         }
     }
 }

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import ArticleMod from '../models/article'
+import ActivityMod from '../models/activity'
 import uuid from 'uuid'
 
 class Article {
@@ -29,7 +30,7 @@ class Article {
 
         ctx.body = {
             message: '保存成功',
-            article: article
+            data: article
 
         }
     }
@@ -72,6 +73,43 @@ class Article {
                 message: 'failed'
             }
         }
+
+        ctx.body = {
+            message: 'success'
+        }
+    }
+
+    async findOne(ctx) {
+        const _id = ctx.request.query._id
+
+        if (_id) {
+            const data = await ArticleMod.findOne({_id:_id})
+
+            ctx.body = {
+                message: 'success',
+                data: data
+            }
+        }
+    }
+
+    async updateTitle(ctx) {
+        const body = ctx.request.body
+        const title = body.title || '[无标题]'
+        const _id  = body._id
+
+        title && await ArticleMod.update({_id: _id},{$set: {title: title}})
+
+        ctx.body = {
+            message: 'success'
+        }
+    }
+
+    async updateDesc(ctx) {
+        const body = ctx.request.body
+        const description = body.description
+        const _id  = body._id
+
+        description && await ArticleMod.update({_id: _id},{$set: {description: description}})
 
         ctx.body = {
             message: 'success'
