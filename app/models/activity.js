@@ -4,12 +4,11 @@ const Schema = mongoose.Schema
 const ObjectId = Schema.Types.ObjectId
 
 const ActivitySchema = new Schema({
-    updated: [String],
-    created: [String],
-    level: {
-        type: String,
-        default: '0'
+    article: {
+        type: ObjectId, 
+        ref: 'Article'
     },
+    operationType: String,
     date: {
         type: Date,
         default: Date.now()

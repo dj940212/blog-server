@@ -10,9 +10,9 @@ class Babel {
     async add( ctx ) {
         const newBabel = ctx.request.body.babel
         let babel = await BabelMod.find({babel:newBabel})
-        console.log(babel)
+        console.log(babel.length)
         if (!babel.length) {
-            new BabelMod().save({babel:newBabel})
+            new BabelMod({babel:newBabel}).save()
             // const allBabel = await BabelMod().find({})
             ctx.body = {
                 message: 'success',

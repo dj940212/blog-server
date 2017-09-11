@@ -6,7 +6,7 @@ import uuid from 'uuid'
 class Article {
     constructor() {}
 
-    async save(ctx) {
+    async add(ctx) {
         const key = uuid.v4()
         const title = ctx.request.body.title 
         const content = ctx.request.body.content
@@ -20,8 +20,14 @@ class Article {
             description: description
         })
 
+        const activity = new Activity({
+            article: article,
+            operationType: 'created'
+        })
+
         try {
             article = article.save()
+            activity = activity.save()
         }catch(e) {
             ctx.body = {
                 message: '保存失败'
@@ -31,7 +37,6 @@ class Article {
         ctx.body = {
             message: '保存成功',
             data: article
-
         }
     }
 
@@ -58,6 +63,13 @@ class Article {
         title && await ArticleMod.update({_id: _id},{$set: {title: title}})
         content && await ArticleMod.update({_id: _id},{$set: {content: content}})
         description && await ArticleMod.update({_id: _id},{$set: {description: description}})
+
+        // 保存操作日志
+        const article = await ActivityMod.findOne({_id: _id})
+        const activity = new Activity({
+            article: article,
+            operationType: 'update'
+        })
 
         ctx.body = {
             message: 'success'
