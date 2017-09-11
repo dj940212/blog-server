@@ -7,51 +7,55 @@ class Babel {
 
     }
 
-    async save() {
-        new BabelMod().save({id:'222333'})
-    }
-
     async add( ctx ) {
         const newBabel = ctx.request.body.babel
-        new BabelMod().save({id:'222333'})
-        let babel = await BabelMod.find({id:'222333'})
+        let babel = await BabelMod.find({babel:newBabel})
         console.log(babel)
-        // let endBabel
-        // if (babel.length) {
-        //     newBabel && babel.push(newBabel)
-        //     endBabel = await BabelMod.update({id:'222333'},{$set:{babel: babel}})
-        // }else {
-        //     new BabelMod().save({id:'222333'})
-        //     newBabel && babel.push(newBabel)
-        //     console.log(babel)
-        //     endBabel = await BabelMod.update({id:'222333'},{$set:{babel: babel}})
-        // }
-        
-
-        ctx.body = {
-            message: 'success',
-            data: babel
+        if (!babel.length) {
+            new BabelMod().save({babel:newBabel})
+            // const allBabel = await BabelMod().find({})
+            ctx.body = {
+                message: 'success',
+                // data: allBabel
+            }
+        }else {
+            ctx.body = {
+                message: 'babel已存在',
+            }
         }
     }
 
     async delete(ctx) {
-        const index = ctx.request.body.index
-        let babel = await BabelMod.find({})
-        babel.splice(index,1)
-        let endBabel = await BabelMod.update({},{$set:{babel: babel}})
+        const _id = ctx.request.body._id
 
+        try {
+            await BabelMod.remove({_id:_id})
+        }catch(e){
+            ctx.body = {
+                message: 'fail',
+                data: e
+            }
+        }
+        
         ctx.body = {
-            message: 'success',
-            data: endBabel
+            message: 'success'
         }
     }
 
     async list(ctx) {
-        const babel = await BabelMod.find({})
+        let allBabel
+        try{
+            allBabel = await BabelMod.find({})
+        }catch(e) {
+            ctx.body = {
+                message: 'fail',
+                data: e
+            }
+        }
 
         ctx.body = {
             message: 'success',
-            data: babel
+            data: allBabel
         }
     }
 }
