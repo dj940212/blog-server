@@ -13,24 +13,24 @@ class Article {
         const description = ctx.request.body.description
         const babel  = ctx.request.body.babel.split(',')
 
-        const article = new ArticleMod({
+        let article = new ArticleMod({
             title: title,
             content: content,
             babel: babel,
             description: description
         })
 
-        const activity = new Activity({
-            article: article,
-            operationType: 'created'
-        })
-
         try {
-            article = article.save()
-            activity = activity.save()
+            article = await article.save()
+            const activity = new ActivityMod({
+                article_id: article._id,
+                article_title: article.title,
+                operationType: 'created'
+            })
+            await activity.save()
         }catch(e) {
             ctx.body = {
-                message: '保存失败'
+                message: '保存失败',
             }
         }
 
@@ -65,11 +65,13 @@ class Article {
         description && await ArticleMod.update({_id: _id},{$set: {description: description}})
 
         // 保存操作日志
-        const article = await ActivityMod.findOne({_id: _id})
-        const activity = new Activity({
-            article: article,
-            operationType: 'update'
+        const article = await ArticleMod.findOne({_id: _id})
+        const activity = new ActivityMod({
+            article_id: article._id,
+            article_title: article.title,
+            operationType: 'updated'
         })
+        await activity.save()
 
         ctx.body = {
             message: 'success'
@@ -79,6 +81,15 @@ class Article {
     async delete(ctx) {
         const _id = ctx.request.body._id
         try {
+            // 保存日志
+            const article = await ArticleMod.findOne({_id: _id})
+            const activity = new ActivityMod({
+                article_id: article._id,
+                article_title: article.title,
+                operationType: 'deleted'
+            })
+            await activity.save()
+            // 删除文章
             await ArticleMod.remove({_id: _id})
         }catch(e) {
             ctx.body = {

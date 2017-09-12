@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import formatTime from '../../utils/formatTime'
 
 const Schema = mongoose.Schema
 const ObjectId = Schema.Types.ObjectId
@@ -10,25 +11,20 @@ const ArticleSchema = new Schema({
     comment: String,
     description: String,
     meta: {
-        createAt: {
-            type: Date, 
-            default: Date.now()
-        },
-        updateAt: {
-            type: Date,
-            default: Date.now()
-        }
+        createAt: String,
+        updateAt: String
     }
 })
 
-ArticleSchema.pre('save', function( next ) {
-    if ( this.isNew ) {
-        this.meta.createAt = this.meta.updateAt = Date.now()
-    }else {
-        this.meta.updateAt = Date.now()
-    }
+ArticleSchema.pre('save', function(next) {
+  if (this.isNew) {
+    this.meta.createAt = formatTime(new Date()) 
+    console.log("创建时间",this.meta.createAt)
+  }else {
+    this.meta.updateAt = formatTime(new Date()) 
+  }
 
-    next()
+  next()
 })
 
 export default mongoose.model('Article', ArticleSchema)
