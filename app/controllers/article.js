@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import ArticleMod from '../models/article'
 import ActivityMod from '../models/activity'
 import uuid from 'uuid'
+import formatTime from '../../utils/formatTime'
 
 class Article {
     constructor() {}
@@ -12,22 +13,40 @@ class Article {
         const content = ctx.request.body.content
         const description = ctx.request.body.description
         const babel  = ctx.request.body.babel.split(',')
-
-        let article = new ArticleMod({
-            title: title,
-            content: content,
-            babel: babel,
-            description: description
-        })
+        let article
 
         try {
-            article = await article.save()
-            const activity = new ActivityMod({
-                article_id: article._id,
-                article_title: article.title,
-                operationType: 'created'
+            article = new ArticleMod({
+                title: title,
+                content: content,
+                babel: babel,
+                description: description
             })
-            await activity.save()
+            article = await article.save()
+
+            const date = formatTime(new Date())
+            let activity = await ActivityMod.findOne({date: date})
+
+            if (activity) {
+                const log = {
+                    article_id: article._id,
+                    article_title: article.title,
+                    operationType: 'created'
+                }
+
+                activity.log.push(log)
+                await activity.save()
+            }else {
+                let newActivity = new ActivityMod({
+                    log: [{
+                        article_id: article._id,
+                        article_title: article.title,
+                        operationType: 'created'
+                    }]
+                })
+                await newActivity.save()
+            }
+        
         }catch(e) {
             ctx.body = {
                 message: '保存失败',
@@ -41,9 +60,9 @@ class Article {
     }
 
     async list(ctx) {
-        const count = ctx.request.body.count || 10
-        const skipNum = ctx.request.body.skipNum || 0
-        const sort = ctx.request.body.sort || -1
+        const count = ctx.request.query.count || 10
+        const skipNum = ctx.request.query.skipNum || 0
+        const sort = ctx.request.query.sort || -1
 
         const data = await ArticleMod.find({}).sort({'meta.createAt': sort}).skip(parseInt(skipNum)).limit(parseInt(count))
 
@@ -59,22 +78,52 @@ class Article {
         const description = body.description
         const title = body.title
         const _id  = body._id
+        
 
         title && await ArticleMod.update({_id: _id},{$set: {title: title}})
         content && await ArticleMod.update({_id: _id},{$set: {content: content}})
         description && await ArticleMod.update({_id: _id},{$set: {description: description}})
 
         // 保存操作日志
-        const article = await ArticleMod.findOne({_id: _id})
-        const activity = new ActivityMod({
-            article_id: article._id,
-            article_title: article.title,
-            operationType: 'updated'
-        })
-        await activity.save()
+        
+        let article
+        try {
+            article = await ArticleMod.findOne({_id: _id})
+            const date = formatTime(new Date())
+            let activity = await ActivityMod.findOne({date: date})
+            console.log(activity)
+
+            if (activity) {
+                console.log("当天有日志")
+                const log = {
+                    article_id: article._id,
+                    article_title: article.title,
+                    operationType: 'updated'
+                }
+                console.log(activity.log)
+                activity.log.push(log)
+                await activity.save()
+            }else {
+                console.log("当天没有日志")
+                const newActivity = new ActivityMod({
+                    log:[{
+                        article_id: article._id,
+                        article_title: article.title,
+                        operationType: 'updated'
+                    }]
+                })
+                await newActivity.save()
+            }
+        
+        }catch(e) {
+            ctx.body = {
+                message: '更新失败',
+            }
+        }
 
         ctx.body = {
-            message: 'success'
+            message: '保存成功',
+            data: article
         }
     }
 
@@ -83,12 +132,25 @@ class Article {
         try {
             // 保存日志
             const article = await ArticleMod.findOne({_id: _id})
-            const activity = new ActivityMod({
-                article_id: article._id,
-                article_title: article.title,
-                operationType: 'deleted'
-            })
-            await activity.save()
+            const date = formatTime(new Date())
+            let activity = await ActivityMod.findOne({date: date})
+
+            if (activity) {
+                const log = {
+                    article_id: article._id,
+                    article_title: article.title,
+                    operationType: 'deleted'
+                }
+                activity.log.push(log)
+                await activity.save()
+            }else {
+                const newActivity = new ActivityMod({
+                    article_id: article._id,
+                    article_title: article.title,
+                    operationType: 'deleted'
+                })
+                await newActivity.save()
+            }
             // 删除文章
             await ArticleMod.remove({_id: _id})
         }catch(e) {

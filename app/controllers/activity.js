@@ -10,7 +10,7 @@ class Activity {
         const sort = ctx.request.body.sort || -1
 
         const data = await ActivityMod.find({}).sort({'date': sort})
-        .skip(parseInt(skipNum)).limit(parseInt(count)).populate('article', 'title decription')
+        .skip(parseInt(skipNum)).limit(parseInt(count))
 
         ctx.body = {
             message: 'success',
