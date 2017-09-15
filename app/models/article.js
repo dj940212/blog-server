@@ -11,8 +11,8 @@ const ArticleSchema = new Schema({
     comment: String,
     description: String,
     meta: {
-        createAt: String,
-        updateAt: String
+      createAt: String,
+      updateAt: String
     }
 })
 
