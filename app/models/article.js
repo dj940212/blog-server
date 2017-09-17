@@ -12,16 +12,19 @@ const ArticleSchema = new Schema({
     description: String,
     meta: {
       createAt: String,
-      updateAt: String
+      updateAt: {
+        type: Date,
+        default: Date.now()
+      }
     }
 })
 
 ArticleSchema.pre('save', function(next) {
   if (this.isNew) {
-    this.meta.createAt = formatTime(new Date()) 
+    this.meta.createAt = formatTime(new Date())
     console.log("创建时间",this.meta.createAt)
   }else {
-    this.meta.updateAt = formatTime(new Date()) 
+    this.meta.updateAt = new Date()
   }
 
   next()

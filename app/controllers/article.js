@@ -9,7 +9,7 @@ class Article {
 
     async add(ctx) {
         const key = uuid.v4()
-        const title = ctx.request.body.title 
+        const title = ctx.request.body.title
         const content = ctx.request.body.content
         const description = ctx.request.body.description
         const babel  = ctx.request.body.babel.split(',')
@@ -46,7 +46,7 @@ class Article {
                 })
                 await newActivity.save()
             }
-        
+
         }catch(e) {
             ctx.body = {
                 message: '保存失败',
@@ -64,7 +64,7 @@ class Article {
         const skipNum = ctx.request.query.skipNum || 0
         const sort = ctx.request.query.sort || -1
 
-        const data = await ArticleMod.find({}).sort({'meta.createAt': sort}).skip(parseInt(skipNum)).limit(parseInt(count))
+        const data = await ArticleMod.find({}).sort({'meta.updateAt': sort}).skip(parseInt(skipNum)).limit(parseInt(count))
 
         ctx.body = {
             message: 'success',
@@ -78,20 +78,26 @@ class Article {
         const description = body.description
         const title = body.title
         const _id  = body._id
-        
 
-        title && await ArticleMod.update({_id: _id},{$set: {title: title}})
-        content && await ArticleMod.update({_id: _id},{$set: {content: content}})
-        description && await ArticleMod.update({_id: _id},{$set: {description: description}})
+        let article = await ArticleMod.findOne({_id:_id})
+        if(title && content && description) {
+          article.title = title
+          article.content = content
+          article.description = description
+          await article.save()
+        }
+        // title && await ArticleMod.update({_id: _id},{$set: {title: title}})
+        // content && await ArticleMod.update({_id: _id},{$set: {content: content}})
+        // description && await ArticleMod.update({_id: _id},{$set: {description: description}})
 
         // 保存操作日志
-        
-        let article
+
+        // let article
         try {
-            article = await ArticleMod.findOne({_id: _id})
+            // article = await ArticleMod.findOne({_id: _id})
             const date = formatTime(new Date())
             let activity = await ActivityMod.findOne({date: date})
-            console.log(activity)
+            // console.log(activity)
 
             if (activity) {
                 console.log("当天有日志")
@@ -114,7 +120,7 @@ class Article {
                 })
                 await newActivity.save()
             }
-        
+
         }catch(e) {
             ctx.body = {
                 message: '更新失败',
