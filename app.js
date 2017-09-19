@@ -1,7 +1,7 @@
 import Koa from 'koa'
 import Router from './router/routes.js'
 import mongoose from 'mongoose'
-// import logger from 'koa-logger'
+import logger from 'koa-logger'
 import session from 'koa-session'
 import bodyParser from 'koa-bodyparser'
 import cors from 'koa-cors'
@@ -16,12 +16,12 @@ const app = new Koa()
 const router = Router()
 
 app.use(cors())
-// app.use(logger())
+app.use(logger())
 app.use(session(app))
 app.use(bodyParser())
 app.use(router.routes())
 app.use(router.allowedMethods())
 
 
-app.listen(3000)
+app.listen(8085)
 console.log('blog-server is starting at port 3000')
