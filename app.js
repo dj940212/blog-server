@@ -23,5 +23,5 @@ app.use(router.routes())
 app.use(router.allowedMethods())
 
 
-app.listen(8085)
+app.listen(3000)
 console.log('blog-server is starting at port 3000')
