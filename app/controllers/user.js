@@ -12,7 +12,7 @@ class User {
         let user = new UserMod({
             username: username,
             password: password,
-            salt: uuid.v4()
+            salt: uuid.v4(),
         })
     }
 
