@@ -2,6 +2,7 @@ import Router from 'koa-router'
 import Article from '../app/controllers/article'
 import Babel from '../app/controllers/babel'
 import Activity from '../app/controllers/activity'
+import User from '../app/controllers/user'
 
 export default () => {
 	const router = new Router({ prefix: '/api' })
@@ -23,6 +24,10 @@ export default () => {
     // activity
     router.get('/activity/all', Activity.all)
     router.get('/activity/oneday', Activity.oneDay)
+
+    // user
+    router.post('/user/register', User.register)
+    router.post('/user/login', User.login)
 
 	return router
 }

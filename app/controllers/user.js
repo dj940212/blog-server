@@ -12,24 +12,39 @@ class User {
         let user = new UserMod({
             username: username,
             password: password,
-            salt: uuid.v4(),
         })
+
+        user.save()
+
+        ctx.body= {
+            message: 'success',
+            username: username
+        }
     }
 
     async login(ctx) {
         const username = ctx.request.body.username
         const password = ctx.request.body.password
 
-        let user = UserMod.findOne({username: username, password: password})
-
+        let user = await UserMod.findOne({username: username, password: password})
+        console.log(user)
         if (user) {
-            ctx.cookies.set('userId', user._id, {
+            ctx.cookies.set('userId', "2222222", {
+                path: '/#/login',
                 httpOnly: false,
-                sameSite: 'strict'
+                sameSite: 'strict',
+                maxAge: 10 * 60 * 1000, // cookie有效时长
+                expires: new Date('2017-11-15')
             });
+
+            console.log(ctx.cookies.get('userId')) 
 
             ctx.body={
                 message: 'success',
+            }
+        }else {
+            ctx.body = {
+                message: 'fail'
             }
         }
     }

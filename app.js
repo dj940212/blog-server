@@ -15,7 +15,7 @@ mongoose.connection.on("connected",() => {
 const app = new Koa()
 const router = Router()
 
-app.use(cors())
+app.use(cors({"Access-Control-Allow-Credentials": true}))
 app.use(logger())
 app.use(session(app))
 app.use(bodyParser())
@@ -23,5 +23,5 @@ app.use(router.routes())
 app.use(router.allowedMethods())
 
 
-app.listen(3000)
-console.log('blog-server is starting at port 3000')
+app.listen(8086)
+console.log('blog-server is starting at port 8086')
