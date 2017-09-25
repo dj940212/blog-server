@@ -9,7 +9,7 @@ class Activity {
         const skipNum = ctx.request.body.skipNum || 0
         const sort = ctx.request.body.sort || -1
 
-        const data = await ActivityMod.find({}).sort({'date': sort})
+        const data = await ActivityMod.find({},'date logLen').sort({'date': sort})
         .skip(parseInt(skipNum)).limit(parseInt(count))
 
         ctx.body = {

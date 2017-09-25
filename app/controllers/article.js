@@ -64,7 +64,7 @@ class Article {
         const skipNum = ctx.request.query.skipNum || 0
         const sort = ctx.request.query.sort || -1
 
-        const data = await ArticleMod.find({}).sort({'meta.updateAt': sort}).skip(parseInt(skipNum)).limit(parseInt(count))
+        const data = await ArticleMod.find({},['title', 'description', 'babel', 'meta', 'comment']).sort({'meta.updateAt': sort}).skip(parseInt(skipNum)).limit(parseInt(count))
 
         ctx.body = {
             message: 'success',
@@ -106,7 +106,6 @@ class Article {
                     article_title: article.title,
                     operationType: 'updated'
                 }
-                console.log(activity.log)
                 activity.log.push(log)
                 await activity.save()
             }else {

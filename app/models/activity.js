@@ -15,9 +15,9 @@ const ActivitySchema = new Schema({
         }
     }],
     date: String,
-    level: {
-        type: String,
-        default: "1"
+    logLen: {
+        type: Number,
+        default: 0
     }
 })
 
@@ -25,7 +25,9 @@ ActivitySchema.pre('save', function(next) {
     if (this.isNew) {
         this.date = formatTime(new Date()) 
     }
-    
+    console.log("logLen:",this.log.length)
+    this.logLen = this.log.length || 0
+
     next()
 })
 
