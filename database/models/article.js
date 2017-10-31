@@ -6,12 +6,18 @@ const ObjectId = Schema.Types.ObjectId
 
 const ArticleSchema = new Schema({
     title: String,
-    babel: [String],
     content: String,
     comment: String,
     description: String,
+    label: [{
+      type: ObjectId,
+      ref: 'Label'
+    }],
     meta: {
-      createAt: String,
+      createAt: {
+        type: Date,
+        default: Date.now()
+      },
       updateAt: {
         type: Date,
         default: Date.now()
@@ -21,7 +27,7 @@ const ArticleSchema = new Schema({
 
 ArticleSchema.pre('save', function(next) {
   if (this.isNew) {
-    this.meta.createAt = formatTime(new Date())
+    this.meta.createAt = this.meta.updateAt = new Date()
     console.log("创建时间",this.meta.createAt)
   }else {
     this.meta.updateAt = new Date()

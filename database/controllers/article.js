@@ -3,23 +3,21 @@ import ArticleMod from '../models/article'
 import ActivityMod from '../models/activity'
 import uuid from 'uuid'
 import formatTime from '../../utils/formatTime'
+import LabelMapMod from '../models/labelMap'
+import LabelMod from '../models/label'
 
 class Article {
     constructor() {}
 
-    async add(ctx) {
+    async new(ctx) {
         const key = uuid.v4()
-        const title = ctx.request.body.title
-        const content = ctx.request.body.content
-        const description = ctx.request.body.description
-        const babel  = ctx.request.body.babel.split(',')
+        const {title, content, description} = ctx.request.body
         let article
 
         try {
             article = new ArticleMod({
                 title: title,
                 content: content,
-                babel: babel,
                 description: description
             })
             article = await article.save()
@@ -54,17 +52,26 @@ class Article {
         }
 
         ctx.body = {
+            success: 'true',
             message: '保存成功',
-            data: article
+            data: {
+                _id: article._id,
+                title: article.title,
+                desc: article.description
+            }
         }
     }
 
     async list(ctx) {
-        const count = ctx.request.query.count || 10
+        const count = ctx.request.query.count || 100
         const skipNum = ctx.request.query.skipNum || 0
         const sort = ctx.request.query.sort || -1
 
-        const data = await ArticleMod.find({},['title', 'description', 'babel', 'meta', 'comment']).sort({'meta.updateAt': sort}).skip(parseInt(skipNum)).limit(parseInt(count))
+        const data = await ArticleMod.find({},['title', 'description', 'meta', 'label'])
+            .populate({ path: 'label', select: 'name color artCount' })
+            .sort({'meta.updateAt': sort})
+            .skip(parseInt(skipNum))
+            .limit(parseInt(count))
 
         ctx.body = {
             message: 'success',
@@ -73,11 +80,8 @@ class Article {
     }
 
     async update(ctx) {
-        const body = ctx.request.body
-        const content = body.content
-        const description = body.description
-        const title = body.title
-        const _id  = body._id
+
+        const {content, description, title, _id, babel} = ctx.request.body
 
         let article = await ArticleMod.findOne({_id:_id})
         if(title && content && description) {
@@ -86,18 +90,10 @@ class Article {
           article.description = description
           await article.save()
         }
-        // title && await ArticleMod.update({_id: _id},{$set: {title: title}})
-        // content && await ArticleMod.update({_id: _id},{$set: {content: content}})
-        // description && await ArticleMod.update({_id: _id},{$set: {description: description}})
-
         // 保存操作日志
-
-        // let article
         try {
-            // article = await ArticleMod.findOne({_id: _id})
             const date = formatTime(new Date())
             let activity = await ActivityMod.findOne({date: date})
-            // console.log(activity)
 
             if (activity) {
                 console.log("当天有日志")
@@ -174,7 +170,7 @@ class Article {
 
         if (_id) {
             const data = await ArticleMod.findOne({_id:_id})
-
+               .populate({ path: 'label', select: 'name color artCount' })
             ctx.body = {
                 message: 'success',
                 data: data
@@ -182,28 +178,46 @@ class Article {
         }
     }
 
-    async updateTitle(ctx) {
-        const body = ctx.request.body
-        const title = body.title || '[无标题]'
-        const _id  = body._id
+    async addLabel(ctx) {
+        const {label_id, article_id} = ctx.request.body
+        let article = await ArticleMod.findOne({_id: article_id, label: {$in: [label_id]}})
+        if (article) {
+            ctx.body = {
+                success: false,
+                message: '该标签已存在'
+            }
+            return
+        }
 
-        title && await ArticleMod.update({_id: _id},{$set: {title: title}})
+        article = await ArticleMod.findOne({_id: article_id})
+        let label = await LabelMod.findOne({_id: label_id})
+
+        article.label.push(label)
+        label.article.push(article)
+        article = await article.save()
+        label = await label.save()
 
         ctx.body = {
-            message: 'success'
+            success: true,
+            message: '添加标签成功',
+            data: article.label
         }
     }
 
-    async updateDesc(ctx) {
-        const body = ctx.request.body
-        const description = body.description
-        const _id  = body._id
+    async delLabel(ctx) {
+      const {article_id, label_id} = ctx.request.body
+      let article =await ArticleMod.findOne({_id: article_id})
 
-        description && await ArticleMod.update({_id: _id},{$set: {description: description}})
+      console.log(article.label)
+      const index = article.label.indexOf(label_id)
+      article.label.splice(index,1)
 
-        ctx.body = {
-            message: 'success'
-        }
+      article = await article.save()
+
+      ctx.body = {
+        success: true,
+        data: article.label
+      }
     }
 }
 
